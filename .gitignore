@@ -10,3 +10,7 @@
 ehthumbs.db
 Icon?
 Thumbs.db
+
+# Python generated files #
+##########################
+__pycache__
