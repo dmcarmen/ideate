@@ -3,9 +3,9 @@ PROGNAME=$0
 
 usage() {
   cat << EOF >&2
-Usage: $PROGNAME [-l <lime_dir>] [-m <mol_dir>]
-       -l <lime_dir>: complete path to LIME folder (without ending /).
-       -m <mol_dir>: directory to save the molecules information. By default they will be saved in ideate/mols/.
+Usage: $PROGNAME -l <lime_path> [-m <mol_path>]
+       -l <lime_path>: complete path to LIME folder (without ending /).
+       -m <mol_path>: path where to save the molecules information. By default they will be saved in ideate/mols/.
 EOF
   exit 1
 }
@@ -13,7 +13,7 @@ EOF
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 ERROR="${RED}Error:${NC}"
-BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
+BASEPATH="$( cd "$( dirname "$0" )" && pwd )"
 echo "[CONFIG]" > ideate_config.ini
 
 unset -v LIME_PATH
@@ -43,7 +43,7 @@ while getopts ":l:m:" arg; do
                 exit 1
             fi
         fi
-        cd $BASEDIR
+        cd $BASEPATH
 
       fi
       echo lime_path = $LIME_PATH >> ideate_config.ini
@@ -66,8 +66,8 @@ if [ -z "$LIME_PATH" ]; then
 fi
 
 
-echo ideate_path = $BASEDIR >> ideate_config.ini
-echo model_path = $BASEDIR/src >> ideate_config.ini
+echo ideate_path = $BASEPATH >> ideate_config.ini
+echo model_path = $BASEPATH/src >> ideate_config.ini
 
 echo -e "\nInstalling Python modules..."
 pip install -r ideate_requirements.txt
@@ -76,10 +76,10 @@ echo "DONE!"
 
 #chmod +x src/ideate.py
 #export PATH="$PATH:$HOME/bin"
-#ln -s $BASEDIR/src/ideate.py $HOME/bin/ideate #add shebang in ideate.py
+#ln -s $BASEPATH/src/ideate.py $HOME/bin/ideate #add shebang in ideate.py
 
 #PAST_PATH=$PATH
 #echo $PATH
-#export PATH=${PATH}:${BASEDIR}"/src"
+#export PATH=${PATH}:${BASEPATH}"/src"
 #echo $PATH
 #python src/ideate.py
