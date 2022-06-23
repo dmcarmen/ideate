@@ -26,10 +26,4 @@ app = App()
 sv_ttk.set_theme("light")  # Set light theme
 #sv_ttk.set_theme("dark")  # Set dark theme
 
-#sv_ttk.use_light_theme()  # Set light theme
-#sv_ttk.use_dark_theme()  # Set dark theme
-
-#sv_ttk.toggle_theme()
-
-
 app.mainloop()
