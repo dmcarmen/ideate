@@ -55,12 +55,12 @@ pip install -r ideate_requirements.txt
 
 echo "DONE!"
 
-#chmod +x src/gui.py
+#chmod +x src/ideate.py
 #export PATH="$PATH:$HOME/bin"
-#ln -s $BASEDIR/src/gui.py $HOME/bin/ideate #add shebang in gui.py
+#ln -s $BASEDIR/src/ideate.py $HOME/bin/ideate #add shebang in ideate.py
 
 #PAST_PATH=$PATH
 #echo $PATH
 #export PATH=${PATH}:${BASEDIR}"/src"
 #echo $PATH
-#python src/gui.py
+#python src/ideate.py
