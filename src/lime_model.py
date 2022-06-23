@@ -187,7 +187,7 @@ def input(macros):
 #  par.dust              = "/data/jena_thin_e6.tab"
 #  par.outputfile        = "populations.pop"
 #  par.binoutputfile     = "restart.pop"
-    par.gridfile          = "grid.vtk" # TODO
+#    par.gridfile          = "grid.vtk"
 #    par.pregrid           = shape_file
 #  par.restart           = "restart.pop"
 #  par.gridInFile        = "grid_5.ds"

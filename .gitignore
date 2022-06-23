@@ -14,3 +14,8 @@ Thumbs.db
 # Python generated files #
 ##########################
 __pycache__
+
+# LIME generated files #
+########################
+*.pyc
+*.vtk

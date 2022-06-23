@@ -8,13 +8,20 @@ from utils import *
 
 
 class Model:
-    # TODO: de donde cogerlos
-    lime_path = "/pcdisk/kepler/cdiez/work/lime/"
-    model_path = "/pcdisk/kepler/cdiez/work/csic/gui/"
-    mol_path = model_path + "mols/"
-    Path(mol_path).mkdir(parents=True, exist_ok=True)
+    ini_config = configparser.ConfigParser()
+    ini_config.read("../ideate_config.ini")
+    if 'CONFIG' in ini_config:
+        lime_path = ini_config['CONFIG']['lime_path'] + '/'
+        model_path = ini_config['CONFIG']['model_path'] + '/'
+        ideate_path = ini_config['CONFIG']['ideate_path'] + '/'
+        if 'mol_path' in ini_config['CONFIG']:
+            mol_path = ini_config['CONFIG']['mol_path'] + "/"
+        else:
+            mol_path = ideate_path + "/mols/"
 
-    ini_dir = "~/work/csic/"
+    Path(mol_path).mkdir(parents=True, exist_ok=True)
+    
+    ini_dir = "~"
 
     datos_vars = {}
     datos_pars = {}
@@ -96,7 +103,6 @@ class Model:
             moldat_path = self.mol_path + self.datos_mol['mol_name'] + ".dat"
             Lamda.download_molfile(
                 mol=self.datos_mol['mol_name'], outfilename=moldat_path)
-            # TODO: path choosable
 
             config['MOL']['moldatfile'] = moldat_path
         else:
@@ -132,7 +138,7 @@ class Model:
                 self.datos_img.update(dict(config['IMG']))
             if 'FUNCS' in config:
                 self.datos_funcs.update(dict(config['FUNCS']))
-            # Cuidado al leerlo es str todo...
+            # Careful when reading from configparser: everything is str...
 
     def save_bak(self, path):
         config = self.create_config(check_flag=False)

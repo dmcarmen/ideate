@@ -3,8 +3,9 @@ PROGNAME=$0
 
 usage() {
   cat << EOF >&2
-Usage: $PROGNAME [-l <lime_dir>]
+Usage: $PROGNAME [-l <lime_dir>] [-m <mol_dir>]
        -l <lime_dir>: complete path to LIME folder (without ending /).
+       -m <mol_dir>: directory to save the molecules information. By default they will be saved in ideate/mols/.
 EOF
   exit 1
 }
@@ -13,9 +14,12 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 ERROR="${RED}Error:${NC}"
 BASEDIR="$( cd "$( dirname "$0" )" && pwd )"
+echo "[CONFIG]" > ideate_config.ini
+
+unset -v LIME_PATH
 
 [ $# -eq 0 ] && usage
-while getopts ":l:" arg; do
+while getopts ":l:m:" arg; do
   case $arg in
     l)
       echo "Preparing pylime..."
@@ -39,16 +43,31 @@ while getopts ":l:" arg; do
                 exit 1
             fi
         fi
-        cd $BASEDIR 
+        cd $BASEDIR
+
       fi
+      echo lime_path = $LIME_PATH >> ideate_config.ini
       echo "Done preparing pylime!"
       ;;
-    h | *) # Display help.
+    m)
+      echo mol_path = ${OPTARG} >> ideate_config.ini
+      ;;
+    h) # Display help.
       usage
       exit 0
       ;;
   esac
 done
+
+if [ -z "$LIME_PATH" ]; then
+        echo -e "$ERROR Missing -l <lime_path> parameter" >&2
+        rm ideate_config.ini
+        exit 1
+fi
+
+
+echo ideate_path = $BASEDIR >> ideate_config.ini
+echo model_path = $BASEDIR/src >> ideate_config.ini
 
 echo -e "\nInstalling Python modules..."
 pip install -r ideate_requirements.txt
