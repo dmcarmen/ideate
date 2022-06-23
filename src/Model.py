@@ -157,7 +157,7 @@ class Model:
             with open(config_backup, 'w') as cbfile:
                 config.write(cbfile)
 
-            command = 'cd ' + self.lime_path + ' ; ./configure ; make pylime &>/dev/null; . ./pylimerc.sh ; cd ' + \
+            command = 'cd ' + self.lime_path + ' ; . ./pylimerc.sh ; cd ' + \
                 self.model_path + ' ; pylime -t lime_model.py'
             p = sub.Popen(command, shell=True)
             #output, errors = p.communicate()

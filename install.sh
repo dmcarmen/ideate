@@ -33,7 +33,7 @@ while getopts ":l:" arg; do
         else
             if [ -f configure ]
             then
-                ./configure && make pylime && . ./pylimerc.sh #&>/dev/null        
+                (./configure && make pylime && . ./pylimerc.sh) #&>/dev/null        
             else
                 echo -e "\t$ERROR no ./configure file found, make sure it is the correct folder."
                 exit 1
