@@ -15,7 +15,7 @@ Latest ShapeX version can be downloaded from its [web](https://wsteffen75.wixsit
 
 ### LIME
 
-You can follow the full installation steps in [LIME's GitHub](https://github.com/lime-rt/lime). This program uses **pylime**, but this module will be prepared along with **IDEATE** installation.
+You can follow the full installation steps in [LIME's GitHub](https://github.com/lime-rt/lime). This program uses **pylime**. This module uses Python 2, so there should be also a Python2 version in the computer. For the rest of the process this module will be prepared along with **IDEATE** installation. 
 
 ### IDEATE
 
