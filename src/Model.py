@@ -15,9 +15,9 @@ class Model:
         model_path = ini_config['CONFIG']['model_path'] + '/'
         ideate_path = ini_config['CONFIG']['ideate_path'] + '/'
         if 'mol_path' in ini_config['CONFIG']:
-            mol_path = ini_config['CONFIG']['mol_path'] + "/"
+            mol_path = ini_config['CONFIG']['mol_path'] + '/'
         else:
-            mol_path = ideate_path + "/mols/"
+            mol_path = ideate_path + "mols/"
 
     Path(mol_path).mkdir(parents=True, exist_ok=True)
     
