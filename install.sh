@@ -70,7 +70,8 @@ echo ideate_path = $BASEPATH >> ideate_config.ini
 echo model_path = $BASEPATH/src >> ideate_config.ini
 
 echo -e "\nInstalling Python modules..."
-pip install -r ideate_requirements.txt
+pip3 install -r ideate_requirements.txt
+pip3 install python-dateutil
 
 echo "DONE!"
 
