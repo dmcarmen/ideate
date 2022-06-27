@@ -71,6 +71,8 @@ class View(ttk.Frame):
         funcs_tab_control.add(vel_tab, text='Velocity')
         funcs_tab_control.add(turb_tab, text='Turbulence')
         funcs_tab_control.add(temp_tab, text='Temperature')
+        
+        f_str = "f(r)="
 
         # Velocity
         vel_tab_control = ttk.Notebook(vel_tab)
@@ -91,7 +93,7 @@ class View(ttk.Frame):
         self.direction_val.set('radial')
         createToolTip(other_bt, text='Not yet implemented!')
 
-        velfunc_lbl = ttk.Label(modulus_tab, text="v(r)=")
+        velfunc_lbl = ttk.Label(modulus_tab, text=f_str)
         velfunc_lbl.grid(row=0, column=0, padx=(10, 0), pady=(10, 0))
 
         self.vel_entry = ttk.Entry(modulus_tab, width=14, exportselection=0)
@@ -99,7 +101,7 @@ class View(ttk.Frame):
         self.vel_entry.insert(-1, '1')
 
         # Temperature
-        tempfunc_lbl = ttk.Label(temp_tab, text="T(r)=")
+        tempfunc_lbl = ttk.Label(temp_tab, text=f_str)
         tempfunc_lbl.grid(row=0, column=0, padx=(10, 0), pady=(10, 0))
 
         self.temp_entry = ttk.Entry(temp_tab, width=14, exportselection=0)
@@ -107,7 +109,7 @@ class View(ttk.Frame):
         self.temp_entry.insert(-1, '1')
 
         # Density
-        ttk.Label(dens_tab, text="X(r)=").grid(row=0, column=0, sticky='w',padx=(10, 0), pady=(10, 0))
+        ttk.Label(dens_tab, text=f_str).grid(row=0, column=0, sticky='w',padx=(10, 0), pady=(10, 0))
 
         self.dens_entry = ttk.Entry(
             dens_tab, width=14, exportselection=0)
@@ -115,7 +117,7 @@ class View(ttk.Frame):
         self.dens_entry.insert(-1, '1')
 
         # Turbulence
-        turbfunc_lbl = ttk.Label(turb_tab, text="vturb(r)=")
+        turbfunc_lbl = ttk.Label(turb_tab, text=f_str)
         turbfunc_lbl.grid(row=0, column=0, padx=(10, 0), pady=(10, 0))
 
         self.turb_entry = ttk.Entry(turb_tab, width=14, exportselection=0)
