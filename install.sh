@@ -4,8 +4,8 @@ PROGNAME=$0
 usage() {
   cat << EOF >&2
 Usage: $PROGNAME -l <lime_path> [-m <mol_path>]
-       -l <lime_path>: complete path to LIME folder (without ending /).
-       -m <mol_path>: path where to save the molecules information. By default they will be saved in ideate/mols/.
+       -l <lime_path>: complete path to LIME folder (without trailing /).
+       -m <mol_path>: complete path where to save the molecules information (without trailing /). By default they will be saved in ideate/mols/.
 EOF
   exit 1
 }
