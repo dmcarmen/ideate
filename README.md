@@ -7,6 +7,8 @@
 
 To run the program you need to install **ShapeX**, **LIME** and **IDEATE** itself . Follow the instructions in [Installation](#installation). Once installed to run the GUI you need to execute the `ideate.py` file, for example running from the main folder `python src/ideate.py`.
 
+For the analytics functions on the interface you can use all the expressions appearing on [py-expression-eval library](https://pypi.org/project/py-expression-eval/) (strings appearing on **Available operators, constants and functions**).
+
 ## Installation
 
 ### ShapeX
