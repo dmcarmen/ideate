@@ -17,7 +17,7 @@ from scipy.spatial import KDTree
 import errno
 import os
 import configparser
-import re
+import re as reg
 
 from sympy import *
 import math
@@ -110,7 +110,7 @@ shape_file = config['PARS']['shape_file']
 # Reading shape tabulated data file
 df = pd.read_csv(shape_file, sep='\t')
 for c in df.columns:
-    if re.match("Unnamed*", c):
+    if reg.match("Unnamed*", c):
         del df[c]
 df = df.dropna(subset=['Px', 'Py', 'Pz'])
 df = df.reset_index()
