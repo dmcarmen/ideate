@@ -7,22 +7,23 @@
 #		pylime model.py
 #	  You will need the location of pylime in your PATH environment variable; also you need to have the location of the limepar_classes.py module in your PYTHONPATH environment variable.
 
-from sympy import *
-import math
-
 # For definitions of the classes ModelParameters and ImageParameters:
 from limepar_classes import *
 
-# Note that the useful macros defined in lime.h are also provided here in the dictionary 'macros' provided as an argument to each function below. See the example code at the end for the full list of macro values provided.
 import numpy
 import pandas as pd
 from scipy.spatial import KDTree
+
 import errno
 import os
 import configparser
 import re
+
+from sympy import *
+import math
 from py_expression_eval import Parser
 
+# Units conversion dictionary (same as macros, but with some units added)
 uds_dict = {
     "AMU": 1.66053904e-27,
     "CLIGHT": 2.99792458e8,
@@ -48,36 +49,15 @@ uds_dict = {
     "rad": 1,   "º": math.pi/180
 }
 
-'''
-fits_base = splitext(os.path.basename(config['PARS']['fits_file']))[0]
-f = open(fits_folder = os.path.dirname(shape_file) + "/pts_dens0_" + fits_base + ".txt", 'w')
-print("Px\tPy\tPz\t", file=f)
-'''
-config = configparser.ConfigParser()
-config.read('lime_config.ini')
-shape_file = config['PARS']['shape_file']
-
-df = pd.read_csv(shape_file, sep='\t')
-for c in df.columns:
-    if re.match("Unnamed*", c):
-        del df[c]
-df = df.dropna(subset=['Px', 'Py', 'Pz'])
-df = df.reset_index()
-
-# Cambios de unidades en el fichero shape si es necesario
-xyzr_uds = config['UDS']['xyzr']
-df['Px'] *= uds_dict[xyzr_uds]
-df['Py'] *= uds_dict[xyzr_uds]
-df['Pz'] *= uds_dict[xyzr_uds]
-
-lpz = list(set(df['Pz']))
-lpz.sort()
-lpx = list(set(df['Px']))
-lpx.sort()
-lpy = list(set(df['Py']))
-lpy.sort()
+# Auxiliar functions
 
 def max_dist_ordered_pts(pts_list):
+    """
+    max_dist_ordered_pts gives the maximum distance from a list of ordered points.
+
+    :param pts_list: list of ordered points.
+    :return: maximum distance between points in the list.
+    """ 
     max_dist = 0
     for i in range(len(pts_list)-1):
         dist = abs(pts_list[i+1] - pts_list[i])
@@ -85,7 +65,61 @@ def max_dist_ordered_pts(pts_list):
             max_dist = dist
     return max_dist
 
-max_dist = math.sqrt(max_dist_ordered_pts(lpx)**2+max_dist_ordered_pts(lpy)**2+max_dist_ordered_pts(lpz)**2) + 0.1*uds_dict['AU']
+
+def get_radius(x, y, z):
+    """
+    get_radius of the point (x,y,z) from center (0,0,0).
+
+    :param x: x-coordinate.
+    :param y: y-coordinate.
+    :param z: z-coordinate.
+    :return: radius to the center
+    """ 
+    # greater than zero to avoid a singularity at the origin.
+    rMin = 0.1*uds_dict["AU"]
+    r0 = math.sqrt(x*x+y*y+z*z)
+    if r0 > rMin:
+        r = r0
+    else:
+        r = rMin  # Just to prevent overflows at r==0!
+    return r
+
+
+''' TODO: Spherical conversion, not implemented.
+# make sure which units + which convention for  theta, phi, and x,y,z
+# *pi/180 to radians, at themoment spherical: (radial, azimuthal [0,2pi), polar [0,pi])
+def sph2cart(r, theta, phi):
+    x = r * sin(phi) * cos(theta)
+    y = r * sin(phi) * sin(theta)
+    z = r * cos(phi)
+    return [x, y, z]  # line of vision, up right
+
+def cart2sph(x, y, z):  # line of vision, derecha, arriba
+    r = sqrt(x*x + y*y + z*z)
+    phi = acos(z/r)
+    theta = atan2(y, x)
+    return [r, theta, phi]  # (radial, azimuthal [0,2pi), polar [0,pi])
+'''
+
+
+# Reading config ini file
+config = configparser.ConfigParser()
+config.read('lime_config.ini')
+shape_file = config['PARS']['shape_file']
+
+# Reading shape tabulated data file
+df = pd.read_csv(shape_file, sep='\t')
+for c in df.columns:
+    if re.match("Unnamed*", c):
+        del df[c]
+df = df.dropna(subset=['Px', 'Py', 'Pz'])
+df = df.reset_index()
+
+# Units conversion for data from the file
+xyzr_uds = config['UDS']['xyzr']
+df['Px'] *= uds_dict[xyzr_uds]
+df['Py'] *= uds_dict[xyzr_uds]
+df['Pz'] *= uds_dict[xyzr_uds]
 
 if 'density' in config['VARS'] and config.getboolean('VARS', 'density') is True:
     df['Density'] *= uds_dict[config['UDS']['density']]
@@ -103,62 +137,43 @@ if 'turbulence' in config['VARS'] and config.getboolean('VARS', 'turbulence') is
     vel_uds = (config['UDS']['turbulence']).split('/')
     df['Turbulence'] *= uds_dict[vel_uds[0]] / uds_dict[vel_uds[1]]
 
-# Parser to evaluate analytic functions
+# Calculate max distance between points in shape grid
+lpz = list(set(df['Pz']))
+lpz.sort()
+lpx = list(set(df['Px']))
+lpx.sort()
+lpy = list(set(df['Py']))
+lpy.sort()
+
+max_dist = math.sqrt(max_dist_ordered_pts(lpx)**2+max_dist_ordered_pts(lpy)**2+max_dist_ordered_pts(lpz)**2) + 0.1*uds_dict['AU']
+
+# Ini parser to evaluate analytic functions
 parser = Parser()
 
-# kdtree to find nearest points
+# Ini kdtree to find nearest points
 npdf = df[['Px', 'Py', 'Pz']].to_numpy()
 kdtree = KDTree(npdf)
 
-'''
+''' Option 2: using LinearNDInterpolator instead of KDtree. Problem: which fill value for velocity?
 from scipy.interpolate import LinearNDInterpolator
 
 x = df['Px']
 y = df['Py']
 z = df['Pz']
-dens_interpol = LinearNDInterpolator((x,y,z), df['Density'], fill_value=0)
-# TODO fill_value
-vx_interpol = LinearNDInterpolator((x,y,z), df['Vx'], fill_value=0) #TODO solo si se lee
-vy_interpol = LinearNDInterpolator((x,y,z), df['Vy'], fill_value=0) #TODO solo si se lee 
-vz_interpol = LinearNDInterpolator((x,y,z), df['Vz'], fill_value=0) #TODO solo si se lee
+dens_interpol = LinearNDInterpolator((x,y,z), df['Density'], fill_value=1e3)
+vx_interpol = LinearNDInterpolator((x,y,z), df['Vx'], fill_value=0) #TODO only if read
+vy_interpol = LinearNDInterpolator((x,y,z), df['Vy'], fill_value=0) #TODO only if read 
+vz_interpol = LinearNDInterpolator((x,y,z), df['Vz'], fill_value=0) #TODO only if read
 '''
 
-
-def get_radius(x, y, z):
-    # greater than zero to avoid a singularity at the origin.
-    rMin = 0.1*uds_dict["AU"]
-    r0 = math.sqrt(x*x+y*y+z*z)
-    if r0 > rMin:
-        r = r0
-    else:
-        r = rMin  # Just to prevent overflows at r==0!
-    return r
-
-
-# TODO: asegurar unidades + que es theta, que phi, como x,y,z
-# *pi/180 to radians, (radial, azimuthal [0,2pi), polar [0,pi])
-def sph2cart(r, theta, phi):
-    x = r * sin(phi) * cos(theta)
-    y = r * sin(phi) * sin(theta)
-    z = r * cos(phi)
-    return [x, y, z]  # line of vision, derecha, arriba
-
-
-def cart2sph(x, y, z):  # line of vision, derecha, arriba
-    r = sqrt(x*x + y*y + z*z)
-    phi = acos(z/r)
-    theta = atan2(y, x)
-    return [r, theta, phi]  # (radial, azimuthal [0,2pi), polar [0,pi])
-
 # .......................................................................
-
 
 def input(macros):
     par = ModelParameters()
 
     # We give all the possible parameters here, but have commented out many which can be left at their defaults.
     # Parameters which must be set (they have no sensible defaults).
-    #
+    # Parameters are read from the config file, but they can also be set here by hand.
     if 'radius' in config['PARS']:
         par.radius = float(config['PARS']['radius']) * \
             uds_dict[config['UDS']['radius']]
@@ -258,10 +273,10 @@ def input(macros):
 #    par.gridOutFiles      = ['0.txt','1.txt','2.txt','3.txt',"4.ds"]
     if 'moldatfile' in config['MOL']:
         mol_path = config['MOL']['moldatfile']
-        par.moldatfile = [str(mol_path)]
+        par.moldatfile = [str(mol_path)] # must be a list, even when there is only 1 item.
     else:
         raise Exception('moldatfile was not specified')
-    # must be a list, even when there is only 1 item.
+    
 #  par.girdatfile        = ["myGIRs.dat"] # must be a list, even when there is only 1 item.
 
     # Definitions for image #0. Add further similar blocks for additional images.
@@ -328,7 +343,7 @@ def input(macros):
 
     if 'fits_file' in config['PARS']:
         fits_filepath = config['PARS']['fits_file']
-        fits_folder = os.path.dirname(fits_filepath) # TODO: se come cosas?
+        fits_folder = os.path.dirname(fits_filepath) # TODO: if name is too large it gets cut -> lime problem?
     else:
         fits_folder = os.path.dirname(shape_file) + "/gildas/"
         fits_filepath = fits_folder + "model.fits"
@@ -362,33 +377,26 @@ def density(macros, x, y, z):
 
   The identity of each collision partner is provided via the list parameter par.collPartIds. If you do provide this, obviously it must have the same number and ordering of elements as the density list you provide here; if you don't include it, LIME will try to guess the identities of the species you provide density values for.
     """
-    '''
-    val = float(dens_interpol((x,y,z)))
-    if val > 1e3:
-        return [val]
-    else:
-        return [1e3]
-    '''
 
+    # Finding nearest point in tabulated data
     dist, i = kdtree.query((x, y, z))
     
+    # If it is too far, it is considered to be outside of the modelled structure
     if dist >= max_dist:
-        #print(dist, x,y,z, df.iloc[i,:])
         return [1e3]
     
-    if config.getboolean('VARS', 'density') is True:
+    if config.getboolean('VARS', 'density') is True: # density read from tabulated data
         dens = float(df['Density'][i])
         if dens <= 1e3:
             dens = 1e3
-    else:
+    else: # density calculated from analytic function
         dens_func = config['FUNCS']['dens_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
-        # careful not to divide by x,y,z (can be 0)
+        # careful not to divide by x,y,z (they can be 0)
         dens = parser.parse(dens_func).evaluate(
             {'r': r}) * uds_dict[config['UDS']['density']]
 
-        # print(dens) #TODO: no sale lo mismo, poner la Px, Py, Pz? Remember cambio de unidades de lo de dentro
     return [dens]
 
 # .......................................................................
@@ -399,15 +407,10 @@ def temperature(macros, x, y, z):
   This function should return a tuple of 2 temperatures (in kelvin). The 2nd is optional, i.e. you can return None for it, and LIME will do the rest.
     """
 
-    #dist, i = kdtree.query((x,y,z))
-
-    # if float(df['Density'][i]) == 0:
-    #    return [0.1, 0.0]
-
-    if config.getboolean('VARS', 'temperature') is True:
+    if config.getboolean('VARS', 'temperature') is True: # temp read from tabulated data
         dist, i = kdtree.query((x, y, z))
         temp = float(df['Temperature'][i])
-    else:
+    else: # temp calculated from analytic function
         temp_func = config['FUNCS']['temp_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -426,7 +429,7 @@ def abundance(macros, x, y, z):
   Note that the 'effective bulk density' mentioned just above is calculated as a weighted sum of the values returned by the density() function, the weights being provided in the par.nMolWeights parameter.
     """
 
-    if 'rel_abundance_func' in config['MOL']:
+    if 'rel_abundance_func' in config['MOL']: # relative abundance calculated from analytic function
         rel_abundance_func = config['MOL']['rel_abundance_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -451,15 +454,12 @@ def doppler(macros, x, y, z):
   Note that the present value refers only to the Doppler broadening due to bulk turbulence; LIME later adds in the temperature-dependent part (which also depends on molecular mass).
     """
 
-    # 200 m/s as the doppler b-parameter. This
-    # can be a function of (x,y,z) as well.
-
-    if config.getboolean('VARS', 'turbulence') is True:
+    if config.getboolean('VARS', 'turbulence') is True: # turbulence read from tabulated data
         dist, i = kdtree.query((x, y, z))
 
         turb = float(df['Turbulence'][i])
         return turb
-    else:
+    else: # turbulence calculated from analytic function
         turb_func = config['FUNCS']['turb_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -469,8 +469,6 @@ def doppler(macros, x, y, z):
 
         return val
 
-    #dopplerBValue = 200.0
-    # return dopplerBValue
 
 # .......................................................................
 
@@ -479,24 +477,15 @@ def velocity(macros, x, y, z):
     """
   Gives the bulk gas velocity vector in m/s.
     """
-    # return [float(vx_interpol((x,y,z))),float(vy_interpol((x,y,z))),float(vz_interpol((x,y,z)))]
 
     vel = [0, 0, 0]  # ini variable
 
-    '''
-    dist, i = kdtree.query((x, y, z))
-
-    if float(df['Density'][i]) == 0:
-        #print(x, y, z)
-        # remember m/s!! TODO cual poner, se necesita??? sale distinto... vz!!
-        return [0, 0, 19*1e3]
-    '''
-    if config.getboolean('VARS', 'velocity') is True:
+    if config.getboolean('VARS', 'velocity') is True: # velocity read from tabulated data
         dist, i = kdtree.query((x,y,z))
         vel[0] = float(df['Vx'][i])
         vel[1] = float(df['Vy'][i])
         vel[2] = float(df['Vz'][i])
-    elif config['FUNCS']['vel_direction'] == 'radial':
+    elif config['FUNCS']['vel_direction'] == 'radial': # velocity calculated from RADIAL analytic function
         vel_func = config['FUNCS']['vel_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -507,6 +496,6 @@ def velocity(macros, x, y, z):
         vel[0] = x*val/r
         vel[1] = y*val/r
         vel[2] = z*val/r
-    else:  # TODO: not implemented...
+    else:  # TODO: not implemented (other vector fields)
         pass
     return vel
