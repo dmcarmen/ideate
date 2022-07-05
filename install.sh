@@ -3,9 +3,10 @@ PROGNAME=$0
 
 usage() {
   cat << EOF >&2
-Usage: $PROGNAME -l <lime_path> [-m <mol_path>]
-       -l <lime_path>: complete path to LIME folder (without trailing /).
+Usage: $PROGNAME [-l <lime_path>] [-m <mol_path>] [-p]
+       -l <lime_path>: complete path to LIME folder (without trailing /). By default it will try to find the command pylime in PATH.
        -m <mol_path>: complete path where to save the molecules information (without trailing /). By default they will be saved in ideate/mols/.
+       -p: if -p is provided required Python packages will be installed.
 EOF
   exit 1
 }
@@ -18,11 +19,11 @@ echo "[CONFIG]" > ideate_config.ini
 
 unset -v LIME_PATH
 
-[ $# -eq 0 ] && usage
-while getopts ":l:m:" arg; do
+#[ $# -eq 0 ] && usage
+while getopts ":l:m:hp" arg; do
   case $arg in
     l)
-      echo "Preparing pylime..."
+      echo -e "\nPreparing pylime..."
       LIME_PATH=${OPTARG}
       if [ ! -d $LIME_PATH ]
       then
@@ -52,26 +53,40 @@ while getopts ":l:m:" arg; do
     m)
       echo mol_path = ${OPTARG} >> ideate_config.ini
       ;;
+    p)
+      echo -e "\nInstalling Python modules..."
+      pip install -r ideate_requirements.txt
+      pip install python-dateutil
+      ;;
     h) # Display help.
       usage
-      exit 0
+      exit 1
+      ;;
+    :)
+      echo -e "$ERROR -${OPTARG} requires an argument. Run ./install.sh -h to see the possible parameters."
+      exit 1           
       ;;
   esac
 done
 
 if [ -z "$LIME_PATH" ]; then
-        echo -e "$ERROR Missing -l <lime_path> parameter" >&2
+    echo -e "\nLooking for pylime..."
+    if ! command -v pylime &> /dev/null
+    then
+        echo -e "$ERROR Missing -l <lime_path> parameter and pylime could not be found" >&2
         rm ideate_config.ini
         exit 1
+    else
+        PYLIME=$(command -v pylime)
+        echo -e "\t$PYLIME found"
+        LIME_PATH="$(dirname "${PYLIME}")"
+        echo lime_path = $LIME_PATH >> ideate_config.ini
+    fi
 fi
 
 
 echo ideate_path = $BASEPATH >> ideate_config.ini
 echo model_path = $BASEPATH/src >> ideate_config.ini
-
-echo -e "\nInstalling Python modules..."
-pip install -r ideate_requirements.txt
-pip install python-dateutil
 
 echo "DONE!"
 

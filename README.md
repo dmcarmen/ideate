@@ -19,10 +19,9 @@ You can follow the full installation steps in [LIME's GitHub](https://github.com
 
 ### IDEATE
 
-Before installing make sure you are using Python 3. You can check your Python version by running `python -V`. This version was tested with Python 3.7.9.
+Before installing make sure you are using Python 3. You can check your Python version by running `python -V`. This version was tested on Python 3.7.9.
 
-By running `./install.sh -l <lime_path> [-m <mol_path>]` you can install **IDEATE** and prepare **pylime**. The script takes two arguments:
-- `-l <lime_path>`: mandatory, complete path to where **LIME** is installed.
-- `-m <mol_path>`: optional, complete path to where to save the molecules information. If not specified, it will be saved in `/mols` folder inside **IDEATE** folder.
-
-Required Python packages appear on `ideate_requirements.txt` and will be installed when running the script.
+By running `./install.sh [-l <lime_path>] [-m <mol_path>] [-p]` you can install **IDEATE** and prepare **pylime**. The script can take zero to three arguments:
+- `-l <lime_path>`: optional, complete path to where **LIME** is installed (written without trailing '/'). By default, it will try to find where pylime command is.
+- `-m <mol_path>`: optional, complete path to where to save the molecules information (written without trailing '/'). If not specified, it will be saved in `/mols` folder inside **IDEATE** folder.
+- `-p`: optional, if provided, required Python packages will be installed. Required Python packages appear on `ideate_requirements.txt`.
