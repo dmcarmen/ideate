@@ -51,13 +51,14 @@ uds_dict = {
 
 # Auxiliar functions
 
+
 def max_dist_ordered_pts(pts_list):
     """
     max_dist_ordered_pts gives the maximum distance from a list of ordered points.
 
     :param pts_list: list of ordered points.
     :return: maximum distance between points in the list.
-    """ 
+    """
     max_dist = 0
     for i in range(len(pts_list)-1):
         dist = abs(pts_list[i+1] - pts_list[i])
@@ -74,7 +75,7 @@ def get_radius(x, y, z):
     :param y: y-coordinate.
     :param z: z-coordinate.
     :return: radius to the center
-    """ 
+    """
     # greater than zero to avoid a singularity at the origin.
     rMin = 0.1*uds_dict["AU"]
     r0 = math.sqrt(x*x+y*y+z*z)
@@ -145,7 +146,8 @@ lpx.sort()
 lpy = list(set(df['Py']))
 lpy.sort()
 
-max_dist = math.sqrt(max_dist_ordered_pts(lpx)**2+max_dist_ordered_pts(lpy)**2+max_dist_ordered_pts(lpz)**2) + 0.1*uds_dict['AU']
+max_dist = math.sqrt(max_dist_ordered_pts(lpx)**2+max_dist_ordered_pts(lpy)
+                     ** 2+max_dist_ordered_pts(lpz)**2) + 0.1*uds_dict['AU']
 
 # Ini parser to evaluate analytic functions
 parser = Parser()
@@ -168,6 +170,7 @@ vz_interpol = LinearNDInterpolator((x,y,z), df['Vz'], fill_value=0) #TODO only i
 
 # .......................................................................
 
+
 def input(macros):
     par = ModelParameters()
 
@@ -182,7 +185,7 @@ def input(macros):
 
     if 'minscale' in config['PARS']:
         par.minScale = float(config['PARS']['minscale']) * \
-          uds_dict[config['UDS']['minscale']]
+            uds_dict[config['UDS']['minscale']]
     else:
         raise Exception('minscale was not specified')
 
@@ -190,7 +193,6 @@ def input(macros):
         par.pIntensity = int(config['PARS']['pIntensity'])
     else:
         raise Exception('pIntensity was not specified')
-
 
     if 'sinkPoints' in config['PARS']:
         par.sinkPoints = int(config['PARS']['sinkPoints'])
@@ -259,7 +261,8 @@ def input(macros):
 
 #  par.tcmb              = 2.72548
     if 'lte' in config['PARS']:
-        par.lte_only = bool(config['PARS']['lte']) # par.lte_only = False by default
+        # par.lte_only = False by default
+        par.lte_only = bool(config['PARS']['lte'])
 #  par.init_lte          = False
 #  par.samplingAlgorithm = 0
 #  par.sampling          = 2 # Now only accessed if par.samplingAlgorithm==0 (the default).
@@ -273,10 +276,11 @@ def input(macros):
 #    par.gridOutFiles      = ['0.txt','1.txt','2.txt','3.txt',"4.ds"]
     if 'moldatfile' in config['MOL']:
         mol_path = config['MOL']['moldatfile']
-        par.moldatfile = [str(mol_path)] # must be a list, even when there is only 1 item.
+        # must be a list, even when there is only 1 item.
+        par.moldatfile = [str(mol_path)]
     else:
         raise Exception('moldatfile was not specified')
-    
+
 #  par.girdatfile        = ["myGIRs.dat"] # must be a list, even when there is only 1 item.
 
     # Definitions for image #0. Add further similar blocks for additional images.
@@ -326,7 +330,8 @@ def input(macros):
     if 'vsys' in config['IMG']:
         vsys_uds = (config['UDS']['vsys']).split('/')
         par.img[-1].source_vel = float(config['IMG']['vsys']) * \
-            uds_dict[vsys_uds[0]] / uds_dict[vsys_uds[1]] # source velocity in m/s
+            uds_dict[vsys_uds[0]] / \
+            uds_dict[vsys_uds[1]]  # source velocity in m/s
 #  par.img[-1].theta             = 0.0
 #  par.img[-1].phi               = 0.0
 #  par.img[-1].incl              = 0.0
@@ -343,17 +348,18 @@ def input(macros):
 
     if 'fits_file' in config['PARS']:
         fits_filepath = config['PARS']['fits_file']
-        fits_folder = os.path.dirname(fits_filepath) # TODO: if name is too large it gets cut -> lime problem?
+        # TODO: if name is too large it gets cut -> lime problem?
+        fits_folder = os.path.dirname(fits_filepath)
     else:
         fits_folder = os.path.dirname(shape_file) + "/gildas/"
         fits_filepath = fits_folder + "model.fits"
-    
+
     try:
         os.makedirs(fits_folder)
     except OSError as error:
         if error.errno != errno.EEXIST:
             raise
-    
+
     par.img[-1].filename = str(fits_filepath)  # Output filename
 
 #  par.img[-1].units = "0,1"
@@ -380,16 +386,16 @@ def density(macros, x, y, z):
 
     # Finding nearest point in tabulated data
     dist, i = kdtree.query((x, y, z))
-    
+
     # If it is too far, it is considered to be outside of the modelled structure
     if dist >= max_dist:
         return [1e3]
-    
-    if config.getboolean('VARS', 'density') is True: # density read from tabulated data
+
+    if config.getboolean('VARS', 'density') is True:  # density read from tabulated data
         dens = float(df['Density'][i])
         if dens <= 1e3:
             dens = 1e3
-    else: # density calculated from analytic function
+    else:  # density calculated from analytic function
         dens_func = config['FUNCS']['dens_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -407,10 +413,10 @@ def temperature(macros, x, y, z):
   This function should return a tuple of 2 temperatures (in kelvin). The 2nd is optional, i.e. you can return None for it, and LIME will do the rest.
     """
 
-    if config.getboolean('VARS', 'temperature') is True: # temp read from tabulated data
+    if config.getboolean('VARS', 'temperature') is True:  # temp read from tabulated data
         dist, i = kdtree.query((x, y, z))
         temp = float(df['Temperature'][i])
-    else: # temp calculated from analytic function
+    else:  # temp calculated from analytic function
         temp_func = config['FUNCS']['temp_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -429,7 +435,8 @@ def abundance(macros, x, y, z):
   Note that the 'effective bulk density' mentioned just above is calculated as a weighted sum of the values returned by the density() function, the weights being provided in the par.nMolWeights parameter.
     """
 
-    if 'rel_abundance_func' in config['MOL']: # relative abundance calculated from analytic function
+    # relative abundance calculated from analytic function
+    if 'rel_abundance_func' in config['MOL']:
         rel_abundance_func = config['MOL']['rel_abundance_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -454,12 +461,13 @@ def doppler(macros, x, y, z):
   Note that the present value refers only to the Doppler broadening due to bulk turbulence; LIME later adds in the temperature-dependent part (which also depends on molecular mass).
     """
 
-    if config.getboolean('VARS', 'turbulence') is True: # turbulence read from tabulated data
+    # turbulence read from tabulated data
+    if config.getboolean('VARS', 'turbulence') is True:
         dist, i = kdtree.query((x, y, z))
 
         turb = float(df['Turbulence'][i])
         return turb
-    else: # turbulence calculated from analytic function
+    else:  # turbulence calculated from analytic function
         turb_func = config['FUNCS']['turb_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
@@ -480,12 +488,14 @@ def velocity(macros, x, y, z):
 
     vel = [0, 0, 0]  # ini variable
 
-    if config.getboolean('VARS', 'velocity') is True: # velocity read from tabulated data
-        dist, i = kdtree.query((x,y,z))
+    # velocity read from tabulated data
+    if config.getboolean('VARS', 'velocity') is True:
+        dist, i = kdtree.query((x, y, z))
         vel[0] = float(df['Vx'][i])
         vel[1] = float(df['Vy'][i])
         vel[2] = float(df['Vz'][i])
-    elif config['FUNCS']['vel_direction'] == 'radial': # velocity calculated from RADIAL analytic function
+    # velocity calculated from RADIAL analytic function
+    elif config['FUNCS']['vel_direction'] == 'radial':
         vel_func = config['FUNCS']['vel_func']
         r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 

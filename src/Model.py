@@ -15,7 +15,7 @@ class Model:
     Raises:
         Exception: see in create_config function for more details.
     """
-    
+
     ini_dir = "~"
 
     # Model data dictionaries.
@@ -26,15 +26,14 @@ class Model:
     datos_uds = {}      # units from functions/variables and several parameters
     datos_funcs = {}    # analytic functions
 
-    
     def __init__(self) -> None:
         """Creates Model and initiates LAMDA molecules dictionary.
         """
-        # Reading ini configuration file to see where ideate model and LIME are located. 
+        # Reading ini configuration file to see where ideate model and LIME are located.
         # Also sees where LAMDA molecules files will be saved.
         ini_config = configparser.ConfigParser()
 
-        cfile_path = Path(dirname(abspath(getsourcefile(lambda:0))))
+        cfile_path = Path(dirname(abspath(getsourcefile(lambda: 0))))
         ini_config.read(Path(cfile_path).parents[0] / "ideate_config.ini")
 
         if 'CONFIG' in ini_config:
@@ -44,11 +43,11 @@ class Model:
                 self.mol_path = Path(ini_config['CONFIG']['mol_path'])
             else:
                 self.mol_path = ini_config['CONFIG']['ideate_path'] + '/mols/'
-        else: 
-            self.lime_path = "~" # TODO: cambiar segun lo que pase con Sergio
+        else:
+            self.lime_path = "~"  # TODO: cambiar segun lo que pase con Sergio
             self.model_path = cfile_path
             self.mol_path = Path(self.model_path).parents[0] / 'mols/'
-            
+
         Path(self.mol_path).mkdir(parents=True, exist_ok=True)
 
         with warnings.catch_warnings():

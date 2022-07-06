@@ -4,6 +4,7 @@ import os
 class Controller:
     """Controller class. Connects Model and View classes transporting data between them.
     """
+
     def __init__(self, model, view=None) -> None:
         """
 

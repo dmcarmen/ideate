@@ -13,6 +13,7 @@ class App(tk.Tk):
     Args:
         tk (_type_): _description_
     """
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -29,6 +30,6 @@ class App(tk.Tk):
 app = App()
 
 sv_ttk.set_theme("light")  # Set light theme
-#sv_ttk.set_theme("dark")  # Set dark theme
+# sv_ttk.set_theme("dark")  # Set dark theme
 
 app.mainloop()

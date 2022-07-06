@@ -666,7 +666,6 @@ class View(ttk.Frame):
             mol = self.mol_tree.item(selected_idx[0])['values'][0]
             self.new_mol_set(mol)
 
-
     ''' ---------------- '''
     ''' Auxiliar widgets '''
     ''' ---------------- '''
@@ -937,7 +936,7 @@ class View(ttk.Frame):
         self.chosen_mol_dic = self.controller.update_mol(mol)
         if self.chosen_mol_dic is not None:
             old_mol = self.chosen_mol_dic['old_mol']
-            if len(old_mol) == 0 or old_mol != mol: # if it is not the same molecule as before
+            if len(old_mol) == 0 or old_mol != mol:  # if it is not the same molecule as before
                 # We change nummber of possible transitions accordingly
                 self.spinbox_len = len(
                     self.chosen_mol_dic['radtransitions'])
