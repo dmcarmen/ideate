@@ -8,6 +8,11 @@ import sv_ttk
 
 
 class App(tk.Tk):
+    """IDEATE app class.
+
+    Args:
+        tk (_type_): _description_
+    """
     def __init__(self) -> None:
         super().__init__()
 
