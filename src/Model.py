@@ -33,7 +33,10 @@ class Model:
         # Reading ini configuration file to see where ideate model and LIME are located. 
         # Also sees where LAMDA molecules files will be saved.
         ini_config = configparser.ConfigParser()
-        ini_config.read("../ideate_config.ini")
+
+        cfile_path = Path(dirname(abspath(getsourcefile(lambda:0))))
+        ini_config.read(Path(cfile_path).parents[0] / "ideate_config.ini")
+
         if 'CONFIG' in ini_config:
             self.lime_path = Path(ini_config['CONFIG']['lime_path'])
             self.model_path = Path(ini_config['CONFIG']['model_path'])
@@ -42,9 +45,8 @@ class Model:
             else:
                 self.mol_path = ini_config['CONFIG']['ideate_path'] + '/mols/'
         else: 
-            # TODO: cambiar segun lo que pase con Sergio
-            self.lime_path = "~"
-            self.model_path = Path(dirname(abspath(getsourcefile(lambda:0))))
+            self.lime_path = "~" # TODO: cambiar segun lo que pase con Sergio
+            self.model_path = cfile_path
             self.mol_path = Path(self.model_path).parents[0] / 'mols/'
             
         Path(self.mol_path).mkdir(parents=True, exist_ok=True)
