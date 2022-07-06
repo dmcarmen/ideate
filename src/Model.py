@@ -38,13 +38,15 @@ class Model:
 
         if 'CONFIG' in ini_config:
             self.lime_path = Path(ini_config['CONFIG']['lime_path'])
-            self.model_path = Path(ini_config['CONFIG']['model_path'])
+            self.model_path = Path(
+                ini_config['CONFIG']['ideate_path']) / 'src/'
             if 'mol_path' in ini_config['CONFIG']:
                 self.mol_path = Path(ini_config['CONFIG']['mol_path'])
             else:
-                self.mol_path = Path(ini_config['CONFIG']['ideate_path']) / 'mols/'
-        else:
-            self.lime_path = Path("~")  # TODO: cambiar segun lo que pase con Sergio
+                self.mol_path = Path(
+                    ini_config['CONFIG']['ideate_path']) / 'mols/'
+        else:  # if there is no ini config file (pylime is on the system)
+            self.lime_path = None
             self.model_path = cfile_path
             self.mol_path = Path(self.model_path).parents[0] / 'mols/'
 
@@ -217,8 +219,13 @@ class Model:
             with open(config_backup, 'w') as cbfile:
                 config.write(cbfile)
 
-            command = 'cd ' + str(self.lime_path) + ' ; . ./pylimerc.sh ; cd ' + \
-                str(self.model_path) + ' ; pylime -t lime_model.py'
+            # If pylime is already a command program is run directly
+            if self.lime_path is None:
+                command = 'cd ' + str(self.model_path) + \
+                    ' ; pylime -t lime_model.py'
+            else:
+                command = 'cd ' + str(self.lime_path) + ' ; . ./pylimerc.sh ; cd ' + \
+                    str(self.model_path) + ' ; pylime -t lime_model.py'
             p = sub.Popen(command, shell=True)
         else:
             raise Exception("You must choose a file to run the program!")

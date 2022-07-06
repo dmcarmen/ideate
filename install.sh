@@ -86,7 +86,6 @@ fi
 
 
 echo ideate_path = $BASEPATH >> ideate_config.ini
-echo model_path = $BASEPATH/src >> ideate_config.ini
 
 echo "DONE!"
 
