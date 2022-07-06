@@ -16,7 +16,7 @@ class Model:
         Exception: see in create_config function for more details.
     """
 
-    ini_dir = "~"
+    ini_dir = Path.home()
 
     # Model data dictionaries.
     datos_vars = {}     # variables read or not from the file
@@ -48,7 +48,7 @@ class Model:
         else:  # if there is no ini config file (pylime is on the system)
             self.lime_path = None
             self.model_path = cfile_path
-            self.mol_path = Path(self.model_path).parents[0] / 'mols/'
+            self.mol_path = self.ini_dir / '.ideate' / 'mols/'
 
         Path(self.mol_path).mkdir(parents=True, exist_ok=True)
 
