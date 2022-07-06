@@ -5,6 +5,7 @@ import subprocess as sub
 from inspect import getsourcefile
 from os.path import abspath, dirname
 import warnings
+import shutil
 
 from utils import *
 
@@ -47,6 +48,8 @@ class Model:
             self.mol_path = self.ini_dir / '.ideate/mols/'
 
         self.model_path = self.ini_dir / '.ideate/'
+        
+        shutil.copyfile(cfile_path / "lime_model.py", self.model_path / "lime_model.py")
         Path(self.mol_path).mkdir(parents=True, exist_ok=True)
 
         with warnings.catch_warnings():
