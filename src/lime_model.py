@@ -107,7 +107,7 @@ def cart2sph(x, y, z):  # line of vision, derecha, arriba
 config = configparser.ConfigParser()
 try:
     with open('lime_config.ini') as f:
-        config.read(f)
+        config.read_file(f)
 except IOError:
     raise Exception('Config file not found. It should be named lime_config.ini and placed in the same folder as the model.')
 
