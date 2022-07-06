@@ -8,35 +8,54 @@ from utils import *
 
 
 class Model:
+    """Model class. Controls IDEATE's data and can call LIME.
+
+    Raises:
+        Exception: see in create_config function for more details.
+    """
+
+    # Reading ini configuration file to see where ideate model and LIME are located. 
+    # Also sees where LAMDA molecules files will be saved.
     ini_config = configparser.ConfigParser()
     ini_config.read("../ideate_config.ini")
     if 'CONFIG' in ini_config:
         lime_path = ini_config['CONFIG']['lime_path'] + '/'
         model_path = ini_config['CONFIG']['model_path'] + '/'
-        ideate_path = ini_config['CONFIG']['ideate_path'] + '/'
         if 'mol_path' in ini_config['CONFIG']:
             mol_path = ini_config['CONFIG']['mol_path'] + '/'
         else:
-            mol_path = ideate_path + "mols/"
+            mol_path = ini_config['CONFIG']['ideate_path'] + '/' + "mols/"
 
     Path(mol_path).mkdir(parents=True, exist_ok=True)
     
     ini_dir = "~"
 
-    datos_vars = {}
-    datos_pars = {}
-    datos_mol = {}
-    datos_img = {}
-    datos_uds = {}
-    datos_funcs = {}
+    # Model data dictionaries.
+    datos_vars = {}     # variables read or not from the file
+    datos_pars = {}     # general parameters for LIME
+    datos_mol = {}      # molecule information
+    datos_img = {}      # image parameters for LIME
+    datos_uds = {}      # units from functions/variables and several parameters
+    datos_funcs = {}    # analytic functions
 
+    
     def __init__(self) -> None:
+        """Creates Model and initiates LAMDA molecules dictionary.
+        """
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.mol_dic = Lamda.molecule_dict
         self.mol_load_flag = False
 
     def update_mol(self, mol):
+        """Updates molecule dictionary information and returns its info. 
+
+        Args:
+            mol (str): molecule name.
+
+        Returns:
+            dict: dictionary with molecule information {'old_mol': old_mol, 'collrates': collrates, 'radtransitions': radtransitions, 'enlevels': enlevels}. If it is the same molecule as before returns None.
+        """
         old_mol = ''
         if 'mol_name' in self.datos_mol and self.mol_load_flag is False:
             self.mol_load_flag = False
@@ -58,6 +77,17 @@ class Model:
             return {'old_mol': old_mol, 'collrates': collrates, 'radtransitions': radtransitions, 'enlevels': enlevels}
 
     def create_config(self, check_flag):
+        """Creates a configuration file with all the dictionaries information.
+
+        Args:
+            check_flag (bool): if True, it will check all needed data is present. 
+
+        Raises:
+            Exception: specified on the function.
+
+        Returns:
+            config: configparser.ConfigParser object with all the data.
+        """
         config = configparser.ConfigParser()
 
         config['VARS'] = self.datos_vars
@@ -120,6 +150,11 @@ class Model:
         return config
 
     def load(self, path):
+        """Loads bak file. Gets all the data from it and updates dictionaries.
+
+        Args:
+            path (_type_): _description_
+        """
         if path is not None and len(path) != 0:
             config = configparser.ConfigParser()
             config.read(path)
@@ -138,15 +173,25 @@ class Model:
                 self.datos_img.update(dict(config['IMG']))
             if 'FUNCS' in config:
                 self.datos_funcs.update(dict(config['FUNCS']))
-            # Careful when reading from configparser: everything is str...
+            # Careful when reading from configparser: everything is str, no bool!
 
     def save_bak(self, path):
+        """Creates the backup configuration file.
+
+        Args:
+            path (str): where to save bak file.
+        """
         config = self.create_config(check_flag=False)
         if config:
             with open(path, 'w') as configfile:
                 config.write(configfile)
 
     def start(self):
+        """Start function to call LIME. It checks shape file format and creates the config file before starting the execution.
+
+        Raises:
+            Exception: if a shape file wasn't chosen exception will be raised. 
+        """
         if 'shape_file' in self.datos_pars:
             check_format(self.datos_pars["shape_file"], self.datos_vars)
             config = self.create_config(check_flag=True)
@@ -166,6 +211,5 @@ class Model:
             command = 'cd ' + self.lime_path + ' ; . ./pylimerc.sh ; cd ' + \
                 self.model_path + ' ; pylime -t lime_model.py'
             p = sub.Popen(command, shell=True)
-            #output, errors = p.communicate()
         else:
             raise Exception("You must choose a file to run the program!")
