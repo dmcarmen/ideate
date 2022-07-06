@@ -105,7 +105,12 @@ def cart2sph(x, y, z):  # line of vision, derecha, arriba
 
 # Reading config ini file
 config = configparser.ConfigParser()
-config.read('lime_config.ini')
+try:
+    with open('lime_config.ini') as f:
+        config.read(f)
+except IOError:
+    raise Exception('Config file not found. It should be named lime_config.ini and placed in the same folder as the model.')
+
 shape_file = config['PARS']['shape_file']
 
 # Reading shape tabulated data file

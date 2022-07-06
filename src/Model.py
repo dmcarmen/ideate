@@ -42,9 +42,9 @@ class Model:
             if 'mol_path' in ini_config['CONFIG']:
                 self.mol_path = Path(ini_config['CONFIG']['mol_path'])
             else:
-                self.mol_path = ini_config['CONFIG']['ideate_path'] + '/mols/'
+                self.mol_path = Path(ini_config['CONFIG']['ideate_path']) / 'mols/'
         else:
-            self.lime_path = "~"  # TODO: cambiar segun lo que pase con Sergio
+            self.lime_path = Path("~")  # TODO: cambiar segun lo que pase con Sergio
             self.model_path = cfile_path
             self.mol_path = Path(self.model_path).parents[0] / 'mols/'
 
