@@ -2,6 +2,8 @@ import configparser
 from pathlib import Path
 from astroquery.lamda import Lamda
 import subprocess as sub
+from inspect import getsourcefile
+from os.path import abspath, dirname
 import warnings
 
 from utils import *
@@ -13,20 +15,6 @@ class Model:
     Raises:
         Exception: see in create_config function for more details.
     """
-
-    # Reading ini configuration file to see where ideate model and LIME are located. 
-    # Also sees where LAMDA molecules files will be saved.
-    ini_config = configparser.ConfigParser()
-    ini_config.read("../ideate_config.ini")
-    if 'CONFIG' in ini_config:
-        lime_path = ini_config['CONFIG']['lime_path'] + '/'
-        model_path = ini_config['CONFIG']['model_path'] + '/'
-        if 'mol_path' in ini_config['CONFIG']:
-            mol_path = ini_config['CONFIG']['mol_path'] + '/'
-        else:
-            mol_path = ini_config['CONFIG']['ideate_path'] + '/' + "mols/"
-
-    Path(mol_path).mkdir(parents=True, exist_ok=True)
     
     ini_dir = "~"
 
@@ -42,6 +30,25 @@ class Model:
     def __init__(self) -> None:
         """Creates Model and initiates LAMDA molecules dictionary.
         """
+        # Reading ini configuration file to see where ideate model and LIME are located. 
+        # Also sees where LAMDA molecules files will be saved.
+        ini_config = configparser.ConfigParser()
+        ini_config.read("../ideate_config.ini")
+        if 'CONFIG' in ini_config:
+            self.lime_path = Path(ini_config['CONFIG']['lime_path'])
+            self.model_path = Path(ini_config['CONFIG']['model_path'])
+            if 'mol_path' in ini_config['CONFIG']:
+                self.mol_path = Path(ini_config['CONFIG']['mol_path'])
+            else:
+                self.mol_path = ini_config['CONFIG']['ideate_path'] + '/mols/'
+        else: 
+            # TODO: cambiar segun lo que pase con Sergio
+            self.lime_path = "~"
+            self.model_path = Path(dirname(abspath(getsourcefile(lambda:0))))
+            self.mol_path = Path(self.model_path).parents[0] / 'mols/'
+            
+        Path(self.mol_path).mkdir(parents=True, exist_ok=True)
+
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             self.mol_dic = Lamda.molecule_dict
@@ -130,7 +137,8 @@ class Model:
         config['MOL'] = self.datos_mol
 
         if 'mol_name' in self.datos_mol:
-            moldat_path = self.mol_path + self.datos_mol['mol_name'] + ".dat"
+            fname = self.datos_mol['mol_name'] + ".dat"
+            moldat_path = str(self.mol_path / fname)
             Lamda.download_molfile(
                 mol=self.datos_mol['mol_name'], outfilename=moldat_path)
 
@@ -196,20 +204,20 @@ class Model:
             check_format(self.datos_pars["shape_file"], self.datos_vars)
             config = self.create_config(check_flag=True)
             if config:
-                with open('lime_config.ini', 'w') as configfile:
+                with open(self.model_path / 'lime_config.ini', 'w') as configfile:
                     config.write(configfile)
 
             if 'fits_file' in self.datos_pars:
                 config_backup = self.datos_pars['fits_file'].rsplit('.')[
                     0] + '.bak'
             else:
-                config_backup = self.model_path + 'model.bak'
+                config_backup = str(self.model_path / 'model.bak')
 
             with open(config_backup, 'w') as cbfile:
                 config.write(cbfile)
 
-            command = 'cd ' + self.lime_path + ' ; . ./pylimerc.sh ; cd ' + \
-                self.model_path + ' ; pylime -t lime_model.py'
+            command = 'cd ' + str(self.lime_path) + ' ; . ./pylimerc.sh ; cd ' + \
+                str(self.model_path) + ' ; pylime -t lime_model.py'
             p = sub.Popen(command, shell=True)
         else:
             raise Exception("You must choose a file to run the program!")
