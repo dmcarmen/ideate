@@ -38,17 +38,15 @@ class Model:
 
         if 'CONFIG' in ini_config:
             self.lime_path = Path(ini_config['CONFIG']['lime_path'])
-            self.model_path = Path(
-                ini_config['CONFIG']['ideate_path']) / 'src/'
             if 'mol_path' in ini_config['CONFIG']:
                 self.mol_path = Path(ini_config['CONFIG']['mol_path'])
             else:
                 self.mol_path = self.ini_dir / '.ideate/mols/'
         else:  # if there is no ini config file (pylime is on the system)
             self.lime_path = None
-            self.model_path = cfile_path
             self.mol_path = self.ini_dir / '.ideate/mols/'
 
+        self.model_path = self.ini_dir / '.ideate/'
         Path(self.mol_path).mkdir(parents=True, exist_ok=True)
 
         with warnings.catch_warnings():
@@ -220,8 +218,7 @@ class Model:
 
             # If pylime is already a command program is run directly
             if self.lime_path is None:
-                command = 'cd ' + str(self.model_path) + \
-                    ' ; pylime -t lime_model.py'
+                command = 'cd ' + str(self.model_path) + ' ; pylime -t lime_model.py'
             else:
                 command = 'cd ' + str(self.lime_path) + ' ; . ./pylimerc.sh ; cd ' + \
                     str(self.model_path) + ' ; pylime -t lime_model.py'
