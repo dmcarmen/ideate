@@ -2,6 +2,13 @@
 
 **IDEATE** (physIcal 3D modElling to rAdiative Transfer intErface) is an interface that allows the output provided by [ShapeX](https://wsteffen75.wixsite.com/website) be used as an input model for the radiative transfer code [LIME](https://lime.readthedocs.io/en/latest/).
 
+**IDEATE** is publicly available, but if you use it for your work, please use the following acknowledgement:
+
+"IDEATE has been developed at the Centro de Astrobiologia (CAB,
+CSIC-INTA, Spain) and is part of the I+D+i project PID2019-105203GB-C22
+funded by the Spanish MCIN/AEI/10.13039/501100011033."
+
+
 ## Table of contents
 - [How to use it](#how-to-use-it)
   * [Input and output](#input-and-output)
@@ -13,6 +20,7 @@
   * [LIME](#lime)
   * [IDEATE](#ideate)
 - [Source code organization and basic logic](#source-code-organization-and-basic-logic)
+- [Aknowledgements](#aknowledgements)
 
 ## How to use it
 
@@ -71,3 +79,13 @@ inside `src/` we can find the following files:
 - `utils.py`: auxiliar functions for *View* and *Model*.
 
 Funtions and classes are documented on the source code.
+
+## Acknowledgements
+
+"IDEATE has been developed at the Centro de Astrobiologia (CAB,
+CSIC-INTA, Spain). C. Diez Menendez acknowledges a JAE-Intro fellowship
+from the Consejo Superior de Investigaciones Científicas (CSIC) -- Reference
+JAEINT_21_02510 --- under the supervision of C. Sánchez Contreras (CAB,
+CSIC-INTA). This work is part of the I+D+i project PID2019-105203GB-C22
+funded by the Spanish MCIN/AEI/10.13039/501100011033."
+
