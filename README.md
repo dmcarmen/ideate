@@ -7,7 +7,7 @@
   * [Input and output](#input-and-output)
     + [Input file](#input-file)
     + [Output file](#output-file)
-  * [Analytic functions available operators constants and functions](#analytic-functions-available-operators-constants-and-functions)
+  * [Available analytic functions](#available-analytic-functions)
 - [Installation](#installation)
   * [ShapeX](#shapex)
   * [LIME](#lime)
@@ -35,7 +35,7 @@ ShapeX output `.txt` tabulated data file follows this format:
 
 Its path and name can be chosen in *General parameters* > *Output location* and it will be a `.fits` file created by LIME.
 
-### Analytic functions available operators constants and functions
+### Available analytic functions
 
 For the analytics functions on the interface you can use all the expressions appearing on [py-expression-eval library](https://pypi.org/project/py-expression-eval/) (strings appearing on **Available operators, constants and functions**).
 
