@@ -25,7 +25,7 @@ To run the program you need to install **ShapeX**, **LIME** and **IDEATE**. Foll
 ShapeX output `.txt` tabulated data file follows this format:
 
 | Object, Species | Px      | Py      | Pz      | Density | Vx      | Vy      | Vz      | Temperature | Turbulence |
-|-----------------|---------|---------|---------|---------|---------|---------|---------|-------------|
+|-----------------|---------|---------|---------|---------|---------|---------|---------|-------------|---|
 | \<str>, \<str>    | \<float> | \<float> | \<float> | \<float> | \<float> | \<float> | \<float> | \<float>     | \<float> |
 
 
