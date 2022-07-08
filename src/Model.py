@@ -43,12 +43,12 @@ class Model:
             if 'mol_path' in ini_config['CONFIG']:
                 self.mol_path = Path(ini_config['CONFIG']['mol_path'])
             else:
-                self.mol_path = self.ini_dir / '.ideate/mols/'
+                self.mol_path = self.ini_dir / '.ideate_dust/mols/'
         else:  # if there is no ini config file (pylime is on the system)
             self.lime_path = None
-            self.mol_path = self.ini_dir / '.ideate/mols/'
+            self.mol_path = self.ini_dir / '.ideate_dust/mols/'
 
-        self.model_path = self.ini_dir / '.ideate/'
+        self.model_path = self.ini_dir / '.ideate_dust/'
         
         shutil.copyfile(cfile_path / "lime_model.py", self.model_path / "lime_model.py")
         Path(self.mol_path).mkdir(parents=True, exist_ok=True)
