@@ -26,6 +26,7 @@ class Model:
     datos_img = {}      # image parameters for LIME
     datos_uds = {}      # units from functions/variables and several parameters
     datos_funcs = {}    # analytic functions
+    datos_dust = {}     # dust data
 
     def __init__(self) -> None:
         """Creates Model and initiates LAMDA molecules dictionary.
@@ -157,6 +158,10 @@ class Model:
 
         config['PARS'] = self.datos_pars
         config['IMG'] = self.datos_img
+        if 'dust_file' not in self.datos_dust and self.datos_dust['dust_activated'] is True and check_flag:
+            raise Exception("If you want to use dust you must provide an opacity table.")
+        else:
+            config['DUST'] = self.datos_dust
 
         return config
 
@@ -184,6 +189,8 @@ class Model:
                 self.datos_img.update(dict(config['IMG']))
             if 'FUNCS' in config:
                 self.datos_funcs.update(dict(config['FUNCS']))
+            if 'DUST' in config:
+                self.datos_dust.update(dict(config['DUST']))
             # Careful when reading from configparser: everything is str, no bool!
 
     def save_bak(self, path):

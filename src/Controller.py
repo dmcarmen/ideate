@@ -41,6 +41,24 @@ class Controller:
             self.model.datos_pars['shape_file'] = path
             return path
 
+    def open_dustfile(self):
+        """Function to open file dialog to choose dust file.
+
+        Returns:
+            str: chosen path.
+        """
+        pars = self.model.datos_dust
+        if 'dust_file' in pars:
+            ini_dir_dust = os.path.dirname(pars['dust_file'])
+        else:
+            ini_dir_dust = self.model.ini_dir
+
+        path = self.view.askopenfilename(ini_dir_dust, "Select file", ((
+            "Tabulated files", "*.tab"), ("CSV", "*.csv"), ("Text files", "*.txt"), ("All Files", "*.*")))
+        if path is not None and len(path) != 0:
+            self.model.datos_dust['dust_file'] = path
+            return path
+
     def change_datos_vars(self, checkbt_val, var):
         """Updates datos_vars dictionary from Model.
 
@@ -58,6 +76,7 @@ class Controller:
         self.model.datos_mol.update(self.view.get_mol())
         self.model.datos_pars.update(self.view.get_datos_pars())
         self.model.datos_img.update(self.view.get_datos_img())
+        self.model.datos_dust.update(self.view.get_datos_dust())
 
     def update_mol(self, mol):
         """Updates molecule information in Model.
@@ -122,6 +141,7 @@ class Controller:
         self.view.update_mol(self.model.datos_mol)
         self.view.update_datos_pars(self.model.datos_pars)
         self.view.update_datos_img(self.model.datos_img)
+        self.view.update_datos_dust(self.model.datos_dust)
 
     def start(self):
         """Updates Model data and calls Model start function.

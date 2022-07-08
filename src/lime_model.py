@@ -206,7 +206,9 @@ def input(macros):
 
     # Parameters which may be omitted (i.e. left at their default values) under some circumstances.
     #
-#  par.dust              = "/data/jena_thin_e6.tab"
+    if 'DUST' in config:
+        if bool(config['DUST']['dust_activated']) is True:
+            par.dust     = str(config['DUST']['dust_file'])
 #  par.outputfile        = "populations.pop"
 #  par.binoutputfile     = "restart.pop"
 #    par.gridfile          = "grid.vtk"
@@ -428,7 +430,16 @@ def temperature(macros, x, y, z):
         temp = parser.parse(temp_func).evaluate(
             {'r': r}) * uds_dict[config['UDS']['temperature']]
 
-    return [temp, 0.0]
+    dust_temp = 0.0
+    if 'DUST' in config:
+        if bool(config['DUST']['dust_activated']) is True:
+            dust_temp = config['DUST']['dust_temp']
+            r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
+
+            dust_temp = parser.parse(dust_temp).evaluate(
+                {'r': r}) * uds_dict[config['UDS']['temperature']]
+
+    return [temp, dust_temp]
 
 # .......................................................................
 
@@ -514,3 +525,20 @@ def velocity(macros, x, y, z):
     else:  # TODO: not implemented (other vector fields)
         pass
     return vel
+
+
+# .......................................................................
+
+def dustIIratio(macros, x, y, z):
+    """The gas-to-dust ratio is an optional function which the user can choose to include in the model.c file. If this function is left out, LIME defaults to a dust-to-gas ratio of 100 everywhere. This number only has an effect if the continuum is included in the calculations.
+    """
+    
+    gas2ratio = 100.0
+    if 'DUST' in config:
+        if bool(config['DUST']['dust_activated']) is True:
+            gas2ratio_func = config['DUST']['gas2ratio_func']
+            r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
+
+            gas2ratio = parser.parse(gas2ratio_func).evaluate({'r': r})
+    
+    return gas2ratio

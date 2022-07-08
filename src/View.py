@@ -35,6 +35,7 @@ class View(ttk.Frame):
         pars_tab = ttk.Frame(app_tab_control)
         mol_tab = ttk.Frame(app_tab_control)
         img_tab = ttk.Frame(app_tab_control)
+        dust_tab = ttk.Frame(app_tab_control)
 
         self.distuds_list = ['m', 'cm', 'km', 'AU', 'PC']
         self.tuds_list = ['s', 'h']
@@ -585,12 +586,63 @@ class View(ttk.Frame):
 
         self.mol_info.grid(row=2, columnspan=3, pady=(10, 10), padx=(10, 0))
 
+        ''' ---------------- '''
+        ''' Dust information '''
+        ''' ---------------- '''        
+        dust_bts_tab = ttk.Frame(dust_tab)
+        dust_bts_tab.grid(row=0, column=1, padx=(10, 20), pady=(20, 20))
+        self.start_save_load_bts(dust_bts_tab)
+        
+        dust_frame = ttk.Frame(dust_tab)
+        dust_frame.grid(row=0, column=0)
+        
+        # Activate dust button
+        self.dust_val = tk.BooleanVar(value=False)
+        ttk.Checkbutton(dust_frame, text="Use dust data?", variable=self.dust_val, command=self.dust_bt_clicked).grid(
+            row=0, column=0, padx=(20, 0), pady=(0, 5), sticky='w')
+        
+        # Dust file selection
+        self.dustfile_bt = ttk.Button(
+            dust_frame, text="Choose your dust opacity table", command=self.open_dustfile_bt_clicked)
+        self.dustfile_bt.grid(row=1, column=0, padx=(
+            20, 5), pady=(20, 10), sticky="nsew")
+
+        self.dustfile_lbl = ttk.Label(dust_frame, text="No file selected.")
+        self.dustfile_lbl.grid(row=1, column=1, padx=(
+            10, 20), pady=(20, 10), sticky="nsew")        
+
+        # Dust temperature
+        ttk.Label(dust_frame, text="Dust temperature (r)").grid(
+            row=2, column=0, padx=(10, 0), pady=(10, 0))
+
+        self.dust_temp_entry = ttk.Entry(dust_frame, width=14, exportselection=0)
+        self.dust_temp_entry.grid(row=2, column=1, padx=(10, 10), pady=(10, 0))
+        self.dust_temp_entry.insert(-1, '0.0')
+        
+        # Gas-to-dust ratio
+        ttk.Label(dust_frame, text="Gas-to-dust ratio (r)").grid(
+            row=3, column=0, padx=(10, 0), pady=(10, 0))
+
+        self.gas2ratio_entry = ttk.Entry(dust_frame, width=14, exportselection=0)
+        self.gas2ratio_entry.grid(row=3, column=1, padx=(10, 10), pady=(10, 0))
+        self.gas2ratio_entry.insert(-1, '100')        
+
+        # All entries are disabled by default
+        self.dust_temp_entry["state"] = "disabled"
+        self.gas2ratio_entry["state"] = "disabled"
+        self.dustfile_bt["state"] = "disabled"
+
+        ''' ----------------- '''
+        ''' Packing interface '''
+        ''' ----------------- '''      
         app_tab_control.add(ini_tab, text='Initial configuration')
         app_tab_control.add(pars_tab, text='General parameters')
         app_tab_control.add(mol_tab, text='Molecule')
         app_tab_control.add(img_tab, text='Image')
+        app_tab_control.add(dust_tab, text='Dust')
 
         app_tab_control.pack(expand=1, fill='both')
+        
 
     ''' ------------------ '''
     ''' Callback functions '''
@@ -601,6 +653,12 @@ class View(ttk.Frame):
             path = self.controller.open_shapefile()
             if path is not None and len(path) != 0:
                 self.shapefile_lbl.config(text=path.split("/")[-1])
+
+    def open_dustfile_bt_clicked(self):
+        if self.controller:
+            path = self.controller.open_dustfile()
+            if path is not None and len(path) != 0:
+                self.dustfile_lbl.config(text=path.split("/")[-1])
 
     def start_bt_clicked(self):
         if self.controller:
@@ -665,6 +723,12 @@ class View(ttk.Frame):
         if len(selected_idx) > 0:
             mol = self.mol_tree.item(selected_idx[0])['values'][0]
             self.new_mol_set(mol)
+
+    def dust_bt_clicked(self):
+        self.dust_temp_entry["state"] = "disabled" if self.dust_val.get() is False else "normal"
+        self.gas2ratio_entry["state"] = "disabled" if self.dust_val.get() is False else "normal"
+        self.dustfile_bt["state"] = "disabled" if self.dust_val.get() is False else "normal"
+        
 
     ''' ---------------- '''
     ''' Auxiliar widgets '''
@@ -891,6 +955,36 @@ class View(ttk.Frame):
         img['vsys'] = self.vsys_entry.get()
 
         return img
+
+    def update_datos_dust(self, dust):
+        """Updates general parameters in GUI.
+
+        Args:
+            dust (dict): dictionary with {dust parameter name: str parameter value}.
+        """
+        if 'dust_activated' in dust:
+            self.dust_val.set(dust['dust_activated'])
+            self.dust_bt_clicked()
+        if 'dust_temp' in dust:
+            self.entry_set_text(self.dust_temp_entry, dust['dust_temp']) #function
+        if 'gas2ratio' in dust:
+            self.entry_set_text(self.gas2ratio_entry, dust['gas2ratio']) #function
+        if 'dust_file' in dust:
+            self.dustfile_lbl.config(text=dust['dust_file'].split("/")[-1])
+
+    def get_datos_dust(self):
+        """Gets all dust parameters entry values.
+
+        Returns:
+            dict: dictionary with {dust parameter name: str parameter value}.
+        """
+        dust = {}
+        dust['dust_activated'] = self.dust_val.get()
+        dust['dust_temp'] = self.dust_temp_entry.get()
+        dust['gas2ratio'] = self.gas2ratio_entry.get()
+        # dust_file
+
+        return dust
 
     # Molecule information functions
     def update_mol(self, datos_mol):
