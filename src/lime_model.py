@@ -432,13 +432,13 @@ def temperature(macros, x, y, z):
 
     dust_temp = 0.0
     if 'DUST' in config:
-        if bool(config['DUST']['dust_activated']) is True:
+        if bool(config['DUST']['dust_activated']) is True and bool(config['DUST']['dust_temp_gas']) is False:
             dust_temp = config['DUST']['dust_temp']
             r = get_radius(x, y, z) / uds_dict[config['UDS']['xyzr']]
 
             dust_temp = parser.parse(dust_temp).evaluate(
                 {'r': r}) * uds_dict[config['UDS']['temperature']]
-
+    
     return [temp, dust_temp]
 
 # .......................................................................

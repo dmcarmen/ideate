@@ -609,28 +609,34 @@ class View(ttk.Frame):
 
         self.dustfile_lbl = ttk.Label(dust_frame, text="No file selected.")
         self.dustfile_lbl.grid(row=1, column=1, padx=(
-            10, 20), pady=(20, 10), sticky="nsew")        
+            10, 20), pady=(20, 10), sticky="nsew")
 
         # Dust temperature
+        self.dust_temp_val = tk.BooleanVar(value=True)
+        self.dust_temp_bt = ttk.Checkbutton(dust_frame, text="Use gas temperature?", variable=self.dust_temp_val, command=self.dust_temp_bt_clicked)
+        self.dust_temp_bt.grid(
+            row=2, column=0, padx=(20, 0), pady=(0, 5))   
+        
         ttk.Label(dust_frame, text="Dust temperature (r)").grid(
-            row=2, column=0, padx=(10, 0), pady=(10, 0))
+            row=3, column=0, padx=(10, 0), pady=(10, 0))
 
         self.dust_temp_entry = ttk.Entry(dust_frame, width=14, exportselection=0)
-        self.dust_temp_entry.grid(row=2, column=1, padx=(10, 10), pady=(10, 0))
-        self.dust_temp_entry.insert(-1, '0.0')
+        self.dust_temp_entry.grid(row=3, column=1, padx=(10, 10), pady=(10, 0))
+        self.dust_temp_entry.insert(-1, '0.0')  
         
         # Gas-to-dust ratio
         ttk.Label(dust_frame, text="Gas-to-dust ratio (r)").grid(
-            row=3, column=0, padx=(10, 0), pady=(10, 0))
+            row=4, column=0, padx=(10, 0), pady=(10, 0))
 
         self.gas2ratio_entry = ttk.Entry(dust_frame, width=14, exportselection=0)
-        self.gas2ratio_entry.grid(row=3, column=1, padx=(10, 10), pady=(10, 0))
+        self.gas2ratio_entry.grid(row=4, column=1, padx=(10, 10), pady=(10, 0))
         self.gas2ratio_entry.insert(-1, '100')        
 
-        # All entries are disabled by default
+        # All dust entries are disabled by default
         self.dust_temp_entry["state"] = "disabled"
         self.gas2ratio_entry["state"] = "disabled"
         self.dustfile_bt["state"] = "disabled"
+        self.dust_temp_bt["state"] = "disabled"
 
         ''' ----------------- '''
         ''' Packing interface '''
@@ -728,7 +734,12 @@ class View(ttk.Frame):
         self.dust_temp_entry["state"] = "disabled" if self.dust_val.get() is False else "normal"
         self.gas2ratio_entry["state"] = "disabled" if self.dust_val.get() is False else "normal"
         self.dustfile_bt["state"] = "disabled" if self.dust_val.get() is False else "normal"
-        
+        self.dust_temp_bt["state"] = "disabled" if self.dust_val.get() is False else "normal"
+        self.dust_temp_bt_clicked()
+
+    def dust_temp_bt_clicked(self):
+        self.dust_temp_entry["state"] = "disabled" if self.dust_temp_val.get() is True else "normal"               
+
 
     ''' ---------------- '''
     ''' Auxiliar widgets '''
@@ -967,6 +978,9 @@ class View(ttk.Frame):
             self.dust_bt_clicked()
         if 'dust_temp' in dust:
             self.entry_set_text(self.dust_temp_entry, dust['dust_temp']) #function
+        if 'dust_temp_gas' in dust:
+            self.dust_temp_val.set(dust['dust_temp_gas'])
+            self.dust_temp_bt_clicked()
         if 'gas2ratio' in dust:
             self.entry_set_text(self.gas2ratio_entry, dust['gas2ratio']) #function
         if 'dust_file' in dust:
@@ -980,6 +994,7 @@ class View(ttk.Frame):
         """
         dust = {}
         dust['dust_activated'] = self.dust_val.get()
+        dust['dust_temp_gas'] = self.dust_temp_val.get()
         dust['dust_temp'] = self.dust_temp_entry.get()
         dust['gas2ratio'] = self.gas2ratio_entry.get()
         # dust_file
