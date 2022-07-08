@@ -493,7 +493,7 @@ class View(ttk.Frame):
 
         self.mol_tree = ttk.Treeview(
             mol_tree_frame, columns=('mol'), show='headings', selectmode='browse')
-        self.mol_tree.heading('mol', text='Molécula')
+        self.mol_tree.heading('mol', text='Molecule')
 
         mol_dic = self.controller.get_mol_dic()
         self.mol_list = list(mol_dic.keys())
@@ -580,7 +580,7 @@ class View(ttk.Frame):
         self.mol_info['columns'] = headings
         for item in headings:
             self.mol_info.column(item, anchor=tk.CENTER,
-                                 width=90, stretch=False)
+                                 width=150, stretch=False)
             self.mol_info.heading(item, text=item, anchor=tk.CENTER)
 
         self.mol_info.grid(row=2, columnspan=3, pady=(10, 10), padx=(10, 0))
