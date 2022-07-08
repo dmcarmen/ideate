@@ -29,7 +29,7 @@ class App(tk.Tk):
 
 app = App()
 
-app.tk.call('tk', 'scaling', 3.0)
+app.tk.call('tk', 'scaling', 30.0)
 sv_ttk.set_theme("light")  # Set light theme
 # sv_ttk.set_theme("dark")  # Set dark theme
 
