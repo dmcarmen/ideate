@@ -223,10 +223,10 @@ class Model:
 
             # If pylime is already a command program is run directly
             if self.lime_path is None:
-                command = 'cd ' + str(self.model_path) + ' ; pylime -t lime_model.py'
+                command = 'cd ' + str(self.model_path) + ' ; pylime lime_model.py'
             else:
                 command = 'cd ' + str(self.lime_path) + ' ; . ./pylimerc.sh ; cd ' + \
-                    str(self.model_path) + ' ; pylime -t lime_model.py'
+                    str(self.model_path) + ' ; pylime lime_model.py'
             p = sub.Popen(command, shell=True)
         else:
             raise Exception("You must choose a file to run the program!")
