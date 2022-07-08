@@ -1,6 +1,5 @@
 import os
 
-
 class Controller:
     """Controller class. Connects Model and View classes transporting data between them.
     """
@@ -14,6 +13,10 @@ class Controller:
         """
         self.model = model
         self.view = view
+        
+        # Auxiliar pars
+        self.save_dir = None
+        self.load_dir = None
 
     def set_view(self, view):
         """View setter.
@@ -99,29 +102,43 @@ class Controller:
             ff = self.model.datos_pars['fits_file']
             ini_dir_bak = os.path.dirname(ff)
             ini_file_bak = os.path.splitext(os.path.basename(ff))[0]+'.bak'
-        else:
+        elif self.save_dir is None:
             ini_dir_bak = self.model.ini_dir
+            ini_file_bak = 'model.bak'
+        else:
+            ini_dir_bak = self.save_dir
             ini_file_bak = 'model.bak'
 
         path = self.view.asksaveasfilename(
             initialdir=ini_dir_bak, initialfile=ini_file_bak, defaultextension=".bak", filetypes=[("Backup files", "*.bak"), ("All Files", "*.*")])
 
         if path is not None and len(path) != 0:
+            self.save_dir = os.path.dirname(path)
             self.model.save_bak(path)
 
     def load(self):
         """Fucntion to be able to choose where bak backup file is to be read and updates View with tha data.
         """
-        path = self.view.askopenfilename(self.model.ini_dir, "Select file", ((
+        if self.load_dir is None:
+            if self.save_dir is None:
+                load_path = self.model.ini_dir
+            else:
+                load_path = self.save_dir
+        else:
+            load_path = self.load_dir
+        path = self.view.askopenfilename(load_path, "Select file", ((
             "Backup files", "*.bak"), ("Text files", "*.txt"), ("All Files", "*.*")))
-        self.model.load(path)
+        
+        if path is not None and len(path) != 0:
+            self.load_dir = os.path.dirname(path)
+            self.model.load(path)
 
-        self.view.update_datos_vars(self.model.datos_vars)
-        self.view.update_uds(self.model.datos_uds)
-        self.view.update_funcs(self.model.datos_funcs)
-        self.view.update_mol(self.model.datos_mol)
-        self.view.update_datos_pars(self.model.datos_pars)
-        self.view.update_datos_img(self.model.datos_img)
+            self.view.update_datos_vars(self.model.datos_vars)
+            self.view.update_uds(self.model.datos_uds)
+            self.view.update_funcs(self.model.datos_funcs)
+            self.view.update_mol(self.model.datos_mol)
+            self.view.update_datos_pars(self.model.datos_pars)
+            self.view.update_datos_img(self.model.datos_img)
 
     def start(self):
         """Updates Model data and calls Model start function.
