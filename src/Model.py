@@ -49,7 +49,9 @@ class Model:
 
         self.model_path = self.ini_dir / '.ideate/'
         
+        Path(self.model_path).mkdir(parents=True, exist_ok=True)
         shutil.copyfile(cfile_path / "lime_model.py", self.model_path / "lime_model.py")
+        
         Path(self.mol_path).mkdir(parents=True, exist_ok=True)
 
         with warnings.catch_warnings():
