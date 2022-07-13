@@ -144,11 +144,13 @@ class Model:
 
         if 'mol_name' in self.datos_mol:
             fname = self.datos_mol['mol_name'] + ".dat"
-            moldat_path = str(self.mol_path / fname)
-            Lamda.download_molfile(
-                mol=self.datos_mol['mol_name'], outfilename=moldat_path)
-
-            config['MOL']['moldatfile'] = moldat_path
+            moldat_path = self.mol_path / fname
+            moldat_path_str = str(moldat_path)
+            if not moldat_path.exists():
+                Lamda.download_molfile(
+                    mol=self.datos_mol['mol_name'], outfilename=moldat_path_str)
+            
+            config['MOL']['moldatfile'] = moldat_path_str
         else:
             if check_flag:
                 raise Exception("You must choose a molecule!")
